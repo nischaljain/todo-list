@@ -8,7 +8,7 @@ function createDeleteBtn(li) {
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "X";
     deleteBtn.addEventListener("click", function (e) {
-        // e.stopPropagation(); // Prevent the click from also toggling "done"
+        e.stopPropagation(); // Prevent the click from also toggling "done"
         li.remove();
     });
     return deleteBtn;
