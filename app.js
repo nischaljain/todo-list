@@ -3,6 +3,27 @@ const input = document.getElementById("todo-input");
 const addBtn = document.getElementById("add-btn");
 const todoList = document.getElementById("todo-list");
 
+// Save all current todos to localStorage
+function saveTodos() {
+    const todos = [];
+    todoList.querySelectorAll("li").forEach(function (li) {
+        todos.push({
+            text: li.firstChild.textContent,
+            done: li.classList.contains("done"),
+        });
+    });
+    localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+// Load todos from localStorage on page load
+function loadTodos() {
+    const saved = localStorage.getItem("todos");
+    if (!saved) return;
+    JSON.parse(saved).forEach(function (todo) {
+        createTodoItem(todo.text, todo.done);
+    });
+}
+
 // Creates a delete button that removes its parent <li> when clicked
 function createDeleteBtn(li) {
     const deleteBtn = document.createElement("button");
@@ -10,30 +31,34 @@ function createDeleteBtn(li) {
     deleteBtn.addEventListener("click", function (e) {
         e.stopPropagation(); // Prevent the click from also toggling "done"
         li.remove();
+        saveTodos();
     });
     return deleteBtn;
+}
+
+// Creates a todo <li> and appends it to the list
+function createTodoItem(text, done) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    if (done) li.classList.add("done");
+
+    li.addEventListener("click", function () {
+        li.classList.toggle("done");
+        saveTodos();
+    });
+
+    li.appendChild(createDeleteBtn(li));
+    todoList.appendChild(li);
 }
 
 // Creates a new todo item and adds it to the list
 function addTodo() {
     const text = input.value.trim();
-
-    // Don't add empty todos
     if (text === "") return;
 
-    // Create a new <li> element
-    const li = document.createElement("li");
-    li.textContent = text;
+    createTodoItem(text, false);
+    saveTodos();
 
-    // Click a todo to mark it as done (toggles strikethrough)
-    li.addEventListener("click", function () {
-        li.classList.toggle("done");
-    });
-
-    li.appendChild(createDeleteBtn(li));
-    todoList.appendChild(li);
-
-    // Clear the input field
     input.value = "";
 }
 
@@ -46,3 +71,6 @@ input.addEventListener("keypress", function (e) {
         addTodo();
     }
 });
+
+// Load saved todos on page load
+loadTodos();
